@@ -2,9 +2,12 @@ import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+import { TonConnectButton } from "@tonconnect/ui-react";
+import { useCounterContract } from "./hooks/useCounterContract";
 
 function App() {
   const [count, setCount] = useState(0);
+  const { value, address } = useCounterContract();
 
   return (
     <>
@@ -16,7 +19,7 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>Vite + React + SWC + TS</h1>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
@@ -28,6 +31,21 @@ function App() {
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
       </p>
+      <div className="App">
+        <div className="Container">
+          <TonConnectButton />
+
+          <div className="Card">
+            <b>Counter Address</b>
+            <div className="Hint">{address?.slice(0, 30) + "..."}</div>
+          </div>
+
+          <div className="Card">
+            <b>Counter Value</b>
+            <div>{value ?? "Loading..."}</div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
