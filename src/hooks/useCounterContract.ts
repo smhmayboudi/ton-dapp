@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import {TonSmartTact} from "../contracts/counter";
+import { TonSmartFunc } from "../contracts/TonSmartFunc";
 import { useTonClient } from "./useTonClient";
 import { useAsyncInitialize } from "./useAsyncInitialize";
-import { Address, OpenedContract } from "@ton/core";
+import { Address, OpenedContract, toNano } from "@ton/core";
 import { useTonConnect } from "./useTonConnect";
 
 export function useCounterContract() {
@@ -10,14 +10,15 @@ export function useCounterContract() {
   const [val, setVal] = useState<null | string>();
   const { sender } = useTonConnect();
 
-  const sleep = (time: number) => new Promise((resolve) => setTimeout(resolve, time));
+  const sleep = (time: number) =>
+    new Promise((resolve) => setTimeout(resolve, time));
 
   const counterContract = useAsyncInitialize(async () => {
     if (!client) return;
-    const contract = TonSmartTact.fromAddress(
-      Address.parse('EQBYLTm4nsvoqJRvs_L-IGNKwWs5RKe19HBK_lFadf19FUfb') // replace with your address from tutorial 2 step 8
+    const contract = TonSmartFunc.createFromAddress(
+      Address.parse("kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"),
     );
-    return client.open(contract) as OpenedContract<TonSmartTact>;
+    return client.open(contract) as OpenedContract<TonSmartFunc>;
   }, [client]);
 
   useEffect(() => {
@@ -36,7 +37,10 @@ export function useCounterContract() {
     value: val,
     address: counterContract?.address.toString(),
     sendIncrement: () => {
-      return counterContract?.sendIncrement(sender);
+      return counterContract?.sendIncrease(sender, {
+        increaseBy: 1,
+        value: toNano('0.05'),
+    });
     },
   };
 }
