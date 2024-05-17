@@ -4,10 +4,12 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import { TonConnectButton } from "@tonconnect/ui-react";
 import { useCounterContract } from "./hooks/useCounterContract";
+import { useTonConnect } from "./hooks/useTonConnect";
 
 function App() {
   const [count, setCount] = useState(0);
-  const { value, address } = useCounterContract();
+  const { connected } = useTonConnect();
+  const { value, address, sendIncrement } = useCounterContract();
 
   return (
     <>
@@ -44,6 +46,15 @@ function App() {
             <b>Counter Value</b>
             <div>{value ?? "Loading..."}</div>
           </div>
+
+          <a
+            className={`Button ${connected ? "Active" : "Disabled"}`}
+            onClick={() => {
+              sendIncrement();
+            }}
+          >
+            Increment
+          </a>
         </div>
       </div>
     </>
