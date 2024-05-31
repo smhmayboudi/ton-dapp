@@ -4,34 +4,35 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import {
   TonConnectButton,
+  useIsConnectionRestored,
   useTonAddress,
+  useTonConnectModal,
+  useTonConnectUI,
   useTonWallet,
 } from "@tonconnect/ui-react";
 import { useCounterContract } from "./hooks/useCounterContract";
 import { useTonConnect } from "./hooks/useTonConnect";
 import "@twa-dev/sdk";
 
-export const Address = () => {
-  const userFriendlyAddress = useTonAddress();
-  const rawAddress = useTonAddress(false);
+export const CounterContract = () => {
+  const { value, address } = useCounterContract();
 
   return (
-    userFriendlyAddress && (
-      <>
-        <div className="Card">
-          <b>Wallet User-friendly Address</b>
-          <div>{userFriendlyAddress}</div>
-        </div>
-        <div className="Card">
-          <b>Wallet Raw Address</b>
-          <div>{rawAddress}</div>
-        </div>
-      </>
-    )
+    <>
+      <div className="Card">
+        <b>Contract Counter Address</b>
+        <div>{address}</div>
+      </div>
+
+      <div className="Card">
+        <b>Contract Counter Value</b>
+        <div>{value ?? "Loading..."}</div>
+      </div>
+    </>
   );
 };
 
-export const SmartContracIncrement = () => {
+export const CounterContractSendIncrement = () => {
   const { connected } = useTonConnect();
   const { sendIncrement } = useCounterContract();
 
@@ -44,7 +45,7 @@ export const SmartContracIncrement = () => {
               sendIncrement();
             }}
           >
-            Increment
+            Send Increment
           </a>
         </div>
       </>
@@ -52,32 +53,78 @@ export const SmartContracIncrement = () => {
   );
 };
 
-export const SmartContractDetails = () => {
-  const { value, address } = useCounterContract();
+export const IsConnectionRestored = () => {
+  const isConnectionRestored = useIsConnectionRestored();
 
-  return (
+  return isConnectionRestored ? (
     <>
       <div className="Card">
-        <b>Smart Contract Counter Address</b>
-        <div>{address}</div>
+        <b style={{ color: "green" }}>Is Connection Restored</b>
       </div>
-
+    </>
+  ) : (
+    <>
       <div className="Card">
-        <b>Smart Contract Counter Value</b>
-        <div>{value ?? "Loading..."}</div>
+        <b style={{ color: "red" }}>Is Connection Restored</b>
       </div>
     </>
   );
 };
 
-export const WalletDetails = () => {
+export const TonAddress = () => {
+  const tonAddressRaw = useTonAddress(false);
+  const tonAddressUserFriendly = useTonAddress();
+
+  return (
+    tonAddressUserFriendly && (
+      <>
+        <div className="Card">
+          <b>Ton Address Raw</b>
+          <div>{tonAddressRaw}</div>
+        </div>
+        <div className="Card">
+          <b>Ton Address User Friendly</b>
+          <div>{tonAddressUserFriendly}</div>
+        </div>
+      </>
+    )
+  );
+};
+
+export const TonConnectModal = () => {
+  const tonConnectModal = useTonConnectModal();
+
+  return (
+    <>
+      <div className="Card">
+        <b>Ton Connect Modal</b>
+        <div>{JSON.stringify(tonConnectModal)}</div>
+      </div>
+    </>
+  );
+};
+
+export const TonConnectUI = () => {
+  const tonConnectUI = useTonConnectUI();
+
+  return (
+    <>
+      <div className="Card">
+        <b>Ton Connect UI</b>
+        <div>{JSON.stringify(tonConnectUI[0].modalState)}</div>
+      </div>
+    </>
+  );
+};
+
+export const TonWallet = () => {
   const wallet = useTonWallet();
 
   return (
     wallet && (
       <div>
         <div className="Card">
-          <b>Wallet Details</b>
+          <b>Ton Wallet</b>
           <div>{JSON.stringify(wallet)}</div>
         </div>
       </div>
@@ -114,10 +161,13 @@ function App() {
         Click on the Vite and React logos to learn more
       </p>
       <div>
-        <SmartContractDetails />
-        <SmartContracIncrement />
-        <Address />
-        <WalletDetails />
+        <CounterContract />
+        <CounterContractSendIncrement />
+        <IsConnectionRestored />
+        <TonAddress />
+        <TonConnectModal />
+        <TonConnectUI />
+        <TonWallet />
       </div>
     </>
   );
