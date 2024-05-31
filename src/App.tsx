@@ -3,6 +3,7 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import {
+  Locales,
   TonConnectButton,
   useIsConnectionRestored,
   useTonAddress,
@@ -105,13 +106,26 @@ export const TonConnectModal = () => {
 };
 
 export const TonConnectUI = () => {
-  const tonConnectUI = useTonConnectUI();
+  const [tonConnectUI, setOptions] = useTonConnectUI();
+
+  const onLanguageChange = (lang: string) => {
+    setOptions({
+      language: lang as Locales,
+    });
+  };
 
   return (
     <>
       <div className="Card">
+        <label>language</label>
+        <select onChange={(e) => onLanguageChange(e.target.value)}>
+          <option value="en">en</option>
+          <option value="ru">ru</option>
+        </select>
+      </div>
+      <div className="Card">
         <b>Ton Connect UI</b>
-        <div>{JSON.stringify(tonConnectUI[0].modalState)}</div>
+        <div>{JSON.stringify(tonConnectUI.modalState)}</div>
       </div>
     </>
   );
