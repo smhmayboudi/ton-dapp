@@ -110,6 +110,9 @@ export const TonConnectUI = () => {
 
   const onLanguageChange = (lang: string) => {
     setOptions({
+      actionsConfiguration: {
+        twaReturnUrl: "https://t.me/ton-dapp/start",
+      },
       language: lang as Locales,
     });
   };
