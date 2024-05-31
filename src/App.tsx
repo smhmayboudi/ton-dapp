@@ -41,13 +41,13 @@ export const CounterContractSendIncrement = () => {
     connected && (
       <>
         <div className="Card">
-          <a
+          <button
             onClick={() => {
               sendIncrement();
             }}
           >
             Send Increment
-          </a>
+          </button>
         </div>
       </>
     )
