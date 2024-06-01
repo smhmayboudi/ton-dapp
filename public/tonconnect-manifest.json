@@ -1,5 +1,7 @@
 {
-  "url": "https://smhmayboudi.github.io/ton-dapp",
+  "iconUrl": "https://smhmayboudi.github.io/ton-dapp/icon.png",
   "name": "TON DAPP",
-  "iconUrl": "https://smhmayboudi.github.io/ton-dapp/icon.png"
+  "privacyPolicyUrl": "<privacy-policy-url>",
+  "termsOfUseUrl": "<terms-of-use-url>",
+  "url": "https://smhmayboudi.github.io/ton-dapp"
 }
