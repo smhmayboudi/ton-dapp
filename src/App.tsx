@@ -73,7 +73,7 @@ export const IsConnectionRestored = () => {
   );
 };
 
-export const SendTransaction = () => {
+export const SendTransactionComment = () => {
   const { connected } = useTonConnect();
   const [tonConnectUI] = useTonConnectUI();
 
@@ -86,7 +86,9 @@ export const SendTransaction = () => {
     validUntil: Math.floor(Date.now() / 1000) + 360,
     messages: [
       {
-        address: Address.parse("kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL").toRawString(),
+        address: Address.parse(
+          "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL",
+        ).toRawString(),
         amount: toNano(0.05).toString(),
         payload: body.toBoc().toString("base64"), // payload with comment in body
       },
@@ -105,6 +107,7 @@ export const SendTransaction = () => {
     )
   );
 };
+
 export const TonAddress = () => {
   const tonAddressRaw = useTonAddress(false);
   const tonAddressUserFriendly = useTonAddress();
@@ -209,7 +212,7 @@ function App() {
         <CounterContract />
         <CounterContractSendIncrement />
         <IsConnectionRestored />
-        <SendTransaction />
+        <SendTransactionComment />
         <TonAddress />
         <TonConnectModal />
         <TonConnectUI />
