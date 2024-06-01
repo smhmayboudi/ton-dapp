@@ -218,14 +218,26 @@ export const SendTransactionJettonForwardPayload = () => {
   );
 };
 
-export const SendTransactionTon = () => {
+export const SendTransactionNFT = () => {
   const { connected } = useTonConnect();
   const [tonConnectUI] = useTonConnectUI();
 
+  const newOwnerWallet = Address.parse(
+    "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"
+  );
+  const walletDST = Address.parse(
+    "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"
+  );
   const body = beginCell()
-    .storeUint(0, 32) // write 32 zero bits to indicate that a text comment will follow
-    .storeStringTail("Hello, TON!") // write our text comment
+    .storeUint(0x5fcc3d14, 32) // NFT transfer op code 0x5fcc3d14
+    .storeUint(0, 64) // query_id:uint64
+    .storeAddress(newOwnerWallet) // new_owner:MsgAddress
+    .storeAddress(walletDST) // response_destination:MsgAddress
+    .storeUint(0, 1) // custom_payload:(Maybe ^Cell)
+    .storeCoins(toNano(0.000000001)) // forward_amount:(VarUInteger 16)
+    .storeBit(0) // forward_payload:(Either Cell ^Cell)
     .endCell();
+
   const destination = Address.parse(
     "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"
   );
@@ -245,7 +257,43 @@ export const SendTransactionTon = () => {
       <>
         <div className="Card">
           <button onClick={() => tonConnectUI.sendTransaction(myTransaction)}>
-            Send Transaction Ton
+            Send Transaction NFT
+          </button>
+        </div>
+      </>
+    )
+  );
+};
+
+export const SendTransactionTon = () => {
+  const { connected } = useTonConnect();
+  const [tonConnectUI] = useTonConnectUI();
+
+  const body = beginCell()
+    .storeUint(0, 32) // write 32 zero bits to indicate that a text comment will follow
+    .storeStringTail("Hello, TON!") // write our text comment
+    .endCell();
+
+    const destination = Address.parse(
+    "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"
+  );
+  const myTransaction = {
+    validUntil: Math.floor(Date.now() / 1000) + 360,
+    messages: [
+      {
+        address: destination.toRawString(),
+        amount: toNano(0.05).toString(),
+        payload: body.toBoc().toString("base64"), // payload with comment in body
+      },
+    ],
+  } as SendTransactionRequest;
+
+  return (
+    connected && (
+      <>
+        <div className="Card">
+          <button onClick={() => tonConnectUI.sendTransaction(myTransaction)}>
+            Send Transaction TON
           </button>
         </div>
       </>
@@ -360,6 +408,7 @@ function App() {
         <SendTransactionJetton />
         <SendTransactionJettonBurn />
         <SendTransactionJettonForwardPayload />
+        <SendTransactionNFT />
         <SendTransactionTon />
         <TonAddress />
         <TonConnectModal />
