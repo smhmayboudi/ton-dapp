@@ -4,6 +4,7 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 import {
   Locales,
+  SendTransactionRequest,
   TonConnectButton,
   useIsConnectionRestored,
   useTonAddress,
@@ -77,21 +78,21 @@ export const SendTransactionJetton = () => {
   const { connected } = useTonConnect();
   const [tonConnectUI] = useTonConnectUI();
 
-  const Wallet_DST = Address.parse(
+  const walletDST = Address.parse(
     "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"
   );
-  const Wallet_SRC = Address.parse(
+  const walletSRC = Address.parse(
     "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"
   );
   const body = beginCell()
     .storeUint(0x0f8a7ea5, 32) // jetton transfer op code
     .storeUint(0, 64) // query_id:uint64
-    .storeCoins(1000000) // amount:(VarUInteger 16) -  Jetton amount for transfer (decimals = 6 - jUSDT, 9 - default)
-    .storeAddress(Wallet_DST) // destination:MsgAddress
-    .storeAddress(Wallet_SRC) // response_destination:MsgAddress
-    .storeUint(0, 1) // custom_payload:(Maybe ^Cell)
+    .storeCoins(toNano(0.001)) // amount:(VarUInteger 16) -  Jetton amount for transfer (decimals = 6 - jUSDT, 9 - default)
+    .storeAddress(walletDST) // destination:MsgAddress
+    .storeAddress(walletSRC) // response_destination:MsgAddress
+    .storeBit(0) // custom_payload:(Maybe ^Cell)
     .storeCoins(toNano(0.05)) // forward_ton_amount:(VarUInteger 16) - if >0, will send notification message
-    .storeUint(0, 1) // forward_payload:(Either Cell ^Cell)
+    .storeBit(0) // forward_payload:(Either Cell ^Cell)
     .endCell();
 
   const jettonWalletContract = Address.parse(
@@ -106,7 +107,7 @@ export const SendTransactionJetton = () => {
         payload: body.toBoc().toString("base64"), // payload with jetton transfer body
       },
     ],
-  };
+  } as SendTransactionRequest;
 
   return (
     connected && (
@@ -114,6 +115,48 @@ export const SendTransactionJetton = () => {
         <div className="Card">
           <button onClick={() => tonConnectUI.sendTransaction(myTransaction)}>
             Send Transaction Jetton
+          </button>
+        </div>
+      </>
+    )
+  );
+};
+
+export const SendTransactionJettonBurn = () => {
+  const { connected } = useTonConnect();
+  const [tonConnectUI] = useTonConnectUI();
+
+  const walletSRC = Address.parse(
+    "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"
+  );
+  const body = beginCell()
+    .storeUint(0x595f07bc, 32) // jetton burn op code
+    .storeUint(0, 64) // query_id:uint64
+    .storeCoins(toNano(0.001)) // amount:(VarUInteger 16) -  Jetton amount in decimal
+    .storeAddress(walletSRC) // response_destination:MsgAddress - owner's wallet
+    .storeBit(0) // custom_payload:(Maybe ^Cell) - w/o payload typically
+    .endCell();
+
+  const jettonWalletContract = Address.parse(
+    "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"
+  );
+  const myTransaction = {
+    validUntil: Math.floor(Date.now() / 1000) + 360,
+    messages: [
+      {
+        address: jettonWalletContract.toRawString(), // sender jetton wallet
+        amount: toNano(0.05).toString(), // for commission fees, excess will be returned
+        payload: body.toBoc().toString("base64"), // payload with jetton transfer body
+      },
+    ],
+  } as SendTransactionRequest;
+
+  return (
+    connected && (
+      <>
+        <div className="Card">
+          <button onClick={() => tonConnectUI.sendTransaction(myTransaction)}>
+            Send Transaction Jetton Burn
           </button>
         </div>
       </>
@@ -130,18 +173,18 @@ export const SendTransactionJettonForwardPayload = () => {
     .storeStringTail("Hello, TON!")
     .endCell();
 
-  const Wallet_DST = Address.parse(
+  const walletDST = Address.parse(
     "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"
   );
-  const Wallet_SRC = Address.parse(
+  const walletSRC = Address.parse(
     "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL"
   );
   const body = beginCell()
     .storeUint(0x0f8a7ea5, 32) // opcode for jetton transfer
     .storeUint(0, 64) // query id
-    .storeCoins(toNano(5)) // jetton amount, amount * 10^9
-    .storeAddress(Wallet_DST) // TON wallet destination address
-    .storeAddress(Wallet_SRC) // response excess destination
+    .storeCoins(toNano(0.001)) // jetton amount, amount * 10^9
+    .storeAddress(walletDST) // TON wallet destination address
+    .storeAddress(walletSRC) // response excess destination
     .storeBit(0) // no custom payload
     .storeCoins(toNano(0.02)) // forward amount (if >0, will send notification message)
     .storeBit(1) // we store forwardPayload as a reference
@@ -160,7 +203,7 @@ export const SendTransactionJettonForwardPayload = () => {
         payload: body.toBoc().toString("base64"), // payload with jetton transfer body
       },
     ],
-  };
+  } as SendTransactionRequest;
 
   return (
     connected && (
@@ -195,7 +238,7 @@ export const SendTransactionTon = () => {
         payload: body.toBoc().toString("base64"), // payload with comment in body
       },
     ],
-  };
+  } as SendTransactionRequest;
 
   return (
     connected && (
@@ -315,6 +358,7 @@ function App() {
         <CounterContractSendIncrement />
         <IsConnectionRestored />
         <SendTransactionJetton />
+        <SendTransactionJettonBurn />
         <SendTransactionJettonForwardPayload />
         <SendTransactionTon />
         <TonAddress />
