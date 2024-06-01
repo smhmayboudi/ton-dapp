@@ -39,7 +39,7 @@ export function useCounterContract() {
     sendIncrement: () => {
       return counterContract?.sendIncrease(sender, {
         increaseBy: 1,
-        value: toNano("0.05"),
+        value: toNano(0.05),
       });
     },
   };
