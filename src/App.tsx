@@ -14,6 +14,7 @@ import {
 import { useCounterContract } from "./hooks/useCounterContract";
 import { useTonConnect } from "./hooks/useTonConnect";
 import "@twa-dev/sdk";
+import { Address, beginCell, toNano } from "@ton/ton";
 
 export const CounterContract = () => {
   const { value, address } = useCounterContract();
@@ -72,6 +73,38 @@ export const IsConnectionRestored = () => {
   );
 };
 
+export const SendTransaction = () => {
+  const { connected } = useTonConnect();
+  const [tonConnectUI] = useTonConnectUI();
+
+  const body = beginCell()
+    .storeUint(0, 32) // write 32 zero bits to indicate that a text comment will follow
+    .storeStringTail("Hello, World!") // write our text comment
+    .endCell();
+
+  const myTransaction = {
+    validUntil: Math.floor(Date.now() / 1000) + 360,
+    messages: [
+      {
+        address: Address.parse("kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL").toRawString(),
+        amount: toNano(0.05).toString(),
+        payload: body.toBoc().toString("base64"), // payload with comment in body
+      },
+    ],
+  };
+
+  return (
+    connected && (
+      <>
+        <div className="Card">
+          <button onClick={() => tonConnectUI.sendTransaction(myTransaction)}>
+            Send Transaction
+          </button>
+        </div>
+      </>
+    )
+  );
+};
 export const TonAddress = () => {
   const tonAddressRaw = useTonAddress(false);
   const tonAddressUserFriendly = useTonAddress();
@@ -176,6 +209,7 @@ function App() {
         <CounterContract />
         <CounterContractSendIncrement />
         <IsConnectionRestored />
+        <SendTransaction />
         <TonAddress />
         <TonConnectModal />
         <TonConnectUI />
