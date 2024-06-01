@@ -73,7 +73,55 @@ export const IsConnectionRestored = () => {
   );
 };
 
-export const SendTransactionComment = () => {
+export const SendTransactionJetton = () => {
+  const { connected } = useTonConnect();
+  const [tonConnectUI] = useTonConnectUI();
+
+  const Wallet_DST = Address.parse(
+    "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL",
+  );
+  const Wallet_SRC = Address.parse(
+    "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL",
+  );
+  const body = beginCell()
+    .storeUint(0xf8a7ea5, 32) // jetton transfer op code
+    .storeUint(0, 64) // query_id:uint64
+    .storeCoins(1000000) // amount:(VarUInteger 16) -  Jetton amount for transfer (decimals = 6 - jUSDT, 9 - default)
+    .storeAddress(Wallet_DST) // destination:MsgAddress
+    .storeAddress(Wallet_SRC) // response_destination:MsgAddress
+    .storeUint(0, 1) // custom_payload:(Maybe ^Cell)
+    .storeCoins(toNano(0.05)) // forward_ton_amount:(VarUInteger 16) - if >0, will send notification message
+    .storeUint(0, 1) // forward_payload:(Either Cell ^Cell)
+    .endCell();
+
+  const jettonWalletContract = Address.parse(
+    "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL",
+  );
+  const myTransaction = {
+    validUntil: Math.floor(Date.now() / 1000) + 360,
+    messages: [
+      {
+        address: jettonWalletContract.toRawString(), // sender jetton wallet
+        amount: toNano(0.05).toString(), // for commission fees, excess will be returned
+        payload: body.toBoc().toString("base64"), // payload with jetton transfer body
+      },
+    ],
+  };
+
+  return (
+    connected && (
+      <>
+        <div className="Card">
+          <button onClick={() => tonConnectUI.sendTransaction(myTransaction)}>
+            Send Transaction Jetton
+          </button>
+        </div>
+      </>
+    )
+  );
+};
+
+export const SendTransactionTon = () => {
   const { connected } = useTonConnect();
   const [tonConnectUI] = useTonConnectUI();
 
@@ -81,14 +129,14 @@ export const SendTransactionComment = () => {
     .storeUint(0, 32) // write 32 zero bits to indicate that a text comment will follow
     .storeStringTail("Hello, World!") // write our text comment
     .endCell();
-
+  const destination = Address.parse(
+    "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL",
+  );
   const myTransaction = {
     validUntil: Math.floor(Date.now() / 1000) + 360,
     messages: [
       {
-        address: Address.parse(
-          "kQDWGcc-KJW7OmdUbaVskkkuF64k6rrhUTG152UkSFXZpIKL",
-        ).toRawString(),
+        address: destination.toRawString(),
         amount: toNano(0.05).toString(),
         payload: body.toBoc().toString("base64"), // payload with comment in body
       },
@@ -100,7 +148,7 @@ export const SendTransactionComment = () => {
       <>
         <div className="Card">
           <button onClick={() => tonConnectUI.sendTransaction(myTransaction)}>
-            Send Transaction
+            Send Transaction Ton
           </button>
         </div>
       </>
@@ -212,7 +260,8 @@ function App() {
         <CounterContract />
         <CounterContractSendIncrement />
         <IsConnectionRestored />
-        <SendTransactionComment />
+        <SendTransactionJetton />
+        <SendTransactionTon />
         <TonAddress />
         <TonConnectModal />
         <TonConnectUI />
